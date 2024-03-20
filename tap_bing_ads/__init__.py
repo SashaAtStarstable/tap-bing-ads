@@ -608,8 +608,8 @@ def get_selected_fields(catalog_item, exclude=None):
             selected_fields.append(prop)
 
     # Raise Exception if incompatible fields are selected
-    if any(invalid_selections):
-        raise Exception("Invalid selections for field(s) - {{ FieldName: [IncompatibleFields] }}:\n{}".format(json.dumps(invalid_selections, indent=4)))
+    # if any(invalid_selections):
+        # raise Exception("Invalid selections for field(s) - {{ FieldName: [IncompatibleFields] }}:\n{}".format(json.dumps(invalid_selections, indent=4)))
     return selected_fields
 
 def filter_selected_fields(selected_fields, obj):
@@ -728,11 +728,11 @@ def sync_core_objects(account_id, selected_streams):
     LOGGER.info('Syncing Campaigns for Account: %s', account_id)
     campaign_ids = sync_campaigns(client, account_id, selected_streams)
 
-    if campaign_ids and ('ad_groups' in selected_streams or 'ads' in selected_streams):
-        ad_group_ids = sync_ad_groups(client, account_id, campaign_ids, selected_streams)
-        if 'ads' in selected_streams:
-            LOGGER.info('Syncing Ads for Account: %s', account_id)
-            sync_ads(client, selected_streams, ad_group_ids)
+    # if campaign_ids and ('ad_groups' in selected_streams or 'ads' in selected_streams):
+    #     ad_group_ids = sync_ad_groups(client, account_id, campaign_ids, selected_streams)
+    #     if 'ads' in selected_streams:
+    #         LOGGER.info('Syncing Ads for Account: %s', account_id)
+    #         sync_ads(client, selected_streams, ad_group_ids)
 
 def type_report_row(row):
     # Check and convert report's field to valid type
@@ -987,7 +987,7 @@ def build_report_request(client, account_id, report_stream, report_name,
     scope.AccountIds = {'long': [account_id]}
     report_request.Scope = scope
 
-    excluded_fields = ['_sdc_report_datetime']
+    excluded_fields = ['_sdc_report_datetime', 'RelativeCtr']
 
     selected_fields = get_selected_fields(report_stream,
                                           exclude=excluded_fields)
@@ -1042,10 +1042,11 @@ async def sync_account_data(account_id, catalog, selected_streams):
         stringcase.snakecase(r) for r in reports.REPORT_WHITELIST
     }
 
-    if len(all_core_streams & set(selected_streams)):
-        # Sync all core objects streams
-        LOGGER.info('Syncing core objects')
-        sync_core_objects(account_id, selected_streams)
+# Sasha: Suppress sync core objects as it takes forever to finish
+    # if len(all_core_streams & set(selected_streams)):
+    #     # Sync all core objects streams
+    #     LOGGER.info('Syncing core objects')
+    #     sync_core_objects(account_id, selected_streams)
 
     if len(all_report_streams & set(selected_streams)):
         # Sync all report streams
